@@ -2,17 +2,59 @@
    basic functions
    ////////////////////////////// *)
 
-(* "Function: max" : int -> int -> int *)
-(* Returns the maximum of two int values *)
-let max (x:int) (y:int) : int = if x >= y then x else y
+(* "Function: fst" : 'a * 'b -> 'a *)
+(* Returns the first element of a tuple (a, b). *)
+let fst (a,b) = a
+
+(* "Function: snd" : 'a * 'b -> 'b *)
+(* Returns the second element of a tuple (a, b). *)
+let snd (a,b) = b
+
+(* "Function: max" : 'a -> 'a -> 'a *)
+(* Returns the maximum of two values with the same type *)
+let max x y = if x >= y then x else y
     
-(* "Function: mid" : int -> int -> int -> int *)
-(* Returns the middle value of three int values *)
-let mid (x:int) (y:int) (z:int) : int =
+(* "Function: mid" : 'a -> 'a -> 'a -> 'a *)
+(* Returns the middle value of three values of the same type *)
+let mid x y z =
   if x <= y
   then if y <= z then y else z
   else if x <= z then x else z
 
+(* "Function: sqrt" : float -> float *)
+(* Calculates the square root of a positive float value x. *)
+let sqrt (x:float) : float =
+  let rec helper (k:float) : float =
+    if k *. k > x then k -. 1.0 else helper (k +. 1.0)
+  in helper 1.0
+
+(* "Function: sqrtf" : float -> float *)
+(* Calculates the square root of a float value using a brute force method.
+   This function is not very efficient, as it keeps incrementing a value k until k * k is
+   greater than the input value x. There are faster algorithms for finding the square root of
+   a number, such as the Newton-Raphson method or the bisection method.
+*)
+let sqrtf (x:float) : float =
+  (* Recursive helper function that keeps incrementing k until k * k is greater than x.
+     Returns the final value of k.
+  *)
+  let rec helper (k:float) : float =
+    if k *. k > x then k -. 1.0 else helper (k +. 1.0)
+  in helper 1.0
+
+(* "Function: sqrti" : int -> int *)
+(* Calculates the square root of an integer value using a brute force method.
+   This function is not very efficient, as it keeps incrementing a value k until k * k is
+   greater than the input value x. There are faster algorithms for finding the square root of
+   a number, such as the Newton-Raphson method or the bisection method.
+*)
+let sqrti (x:int) : int =
+  (* Recursive helper function that keeps incrementing k until k * k is greater than x.
+     Returns the final value of k.
+  *)
+  let rec helper (k:int) : int =
+    if k * k > x then k - 1 else helper (k + 1)
+  in helper 1
 (* //////////////////////////////
    helper rec funcions
    ////////////////////////////// *)
@@ -38,21 +80,25 @@ let rec first f k =
    iter rec functions (helper function)
    ////////////////////////////// *)
 
-(* "Function: iter" : tree -> int list -> tree *) 
+(* "Function: iter" : ('a -> 'a) -> int -> 'a -> 'a *) 
+(* Applies the given function f to the value x a total of n times. *)
 let rec iter f n x =
   if n < 1 then x
   else iter f (n - 1) (f x)
       
-(* "Function: iterdn" : tree -> int list -> tree *) 
+(* "Function: iterdn" : (int * 'a -> 'a) -> int -> int -> 'a -> 'a *) 
+(* Applies the given function f to the value s a total of n-m+1 times,
+   starting with the value of n and decrementing n by 1 each time. *)
 let rec iterdn f n m s =
   if n < m then s else iterdn f (n-1) m (f(n,s)) 
                                                  
-(* "Function: iterup" : tree -> int list -> tree *)   
+(* "Function: iterup" : (int * 'a -> 'a) -> int -> int -> 'a -> 'a *)   
+(* Applies the given function f to the value s a total of n-m+1 times,
+   starting with the value of m and incrementing m by 1 each time. *)
 let rec iterup f m n s =
   if m > n then s else iterup f (m+1) n (f(m,s))
-
 (* //////////////////////////////
-   basic functions with the help of advanced higher oder helper functions 
+   basic functions with the help of advanced higher order helper functions 
    ////////////////////////////// *)
 
 (* "Function: power" : int -> int -> int *) 
@@ -61,8 +107,8 @@ let power (x:int) (n:int) : int =
   iter (fun (a:int) : int -> a*x) n 1
   
 (* "Function: sqrt" : int -> int *) 
- (* Returns the largest integer less than or equal to the square root of x *)
-let sqrt (x:int) : int =
+(* Returns the largest integer less than or equal to the square root of x *)
+let sqrti (x:int) : int =
   first (fun (k:int) : bool -> k * k > x) 1 - 1
 
 (* "Function: gauss" : int -> int *) 
@@ -75,14 +121,14 @@ let gauss (n:int) : int =
    changed basic rec functions
    ////////////////////////////// *)
 
-(* "Function: iterc" : ('a -> 'a) -> int -> 'a -> 'a*)    
+(* "Function: iterwuntil" : ('a -> 'a) -> int -> 'a -> 'a*)    
 (*Iter function with the help of the until function*)
-let iterc f n s =
+let iterwuntil f n s =
   until (fun s -> s < 1) (fun s -> s - 1) f n s
 
-(* "Function: firstc" : ('a -> 'a) -> int -> 'a -> 'a*)    
+(* "Function: firstwuntil" : ('a -> 'a) -> int -> 'a -> 'a*)    
 (*First function with the help of the until function*)
-let firstc p s =
+let firstwuntil p s =
   until p (fun s -> s + 1) (fun s -> s + 1) s s
 
 (* //////////////////////////////
@@ -137,6 +183,11 @@ let rec exists p xl = match xl with
 let rec forall p xl = match xl with
   | [] -> true
   | h::tl -> p h && forall p tl 
+
+(* "Function: split" : 'a list -> 'a list * 'a list *) 
+(* Call exmaple: split [1; 2; 3; 4]*)
+(* This function splits the list xs into two nearly equally large lists *)
+let split xs = foldl (fun x (xs,ys) -> (ys, x::xs)) xs ([],[])
 
 (* //////////////////////////////
    fold functions
@@ -241,10 +292,6 @@ let rec lex (comp : 'a -> 'a -> comparison) xl yl = match xl, yl with
 let lexsort xl = cisort (lex comp) xl
 
 (* // Mergesort \\ *)
-
-(* "Function: split" : 'a list -> 'a list * 'a list *) 
-(* This function splits the list xs into two nearly equally large lists *)
-let split xs = foldl (fun x (xs,ys) -> (ys, x::xs)) xs ([],[])
 
 (* "Function: merge" : 'a list -> 'a list -> 'a list *) 
 (* merge xl yl merges the elements from xl and yl into a single sorted list. *)
@@ -358,7 +405,16 @@ let bbtree n =
   if n < 0 then failwith "bbtree: negative argument"
   else if n = 0 then T []
   else iter (fun (T ts) -> T (T ts :: (T [] :: ts))) n (T [])
-  (*
+  
+(* //////////////////////////////
+   functions for troubleshooting
+   ////////////////////////////// *)
+
+(* "Function: iterInside" : ('a -> 'a) -> int -> 'a -> 'a list *)
+(* Applies the function f to the value x a total of n times, storing the intermediate results in a list. *)
+let iterInside f n x =
+  map (fun y -> iter f y x) (List.init (n+1) (fun i -> i))
+(*
 //                              //
 // End of pre-defined functions //
 //                              //

@@ -1,6 +1,6 @@
 
 (* //////////////////////////////
-   basic functions with the help of advanced higher oder helper functions 
+   basic functions with the help of advanced higher order helper functions 
    ////////////////////////////// *)
 
 (* "Function: power" : int -> int -> int *) 
@@ -9,8 +9,8 @@ let power (x:int) (n:int) : int =
   iter (fun (a:int) : int -> a*x) n 1
   
 (* "Function: sqrt" : int -> int *) 
- (* Returns the largest integer less than or equal to the square root of x *)
-let sqrt (x:int) : int =
+(* Returns the largest integer less than or equal to the square root of x *)
+let sqrti (x:int) : int =
   first (fun (k:int) : bool -> k * k > x) 1 - 1
 
 (* "Function: gauss" : int -> int *) 

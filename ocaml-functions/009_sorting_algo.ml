@@ -58,10 +58,6 @@ let lexsort xl = cisort (lex comp) xl
 
 (* // Mergesort \\ *)
 
-(* "Function: split" : 'a list -> 'a list * 'a list *) 
-(* This function splits the list xs into two nearly equally large lists *)
-let split xs = foldl (fun x (xs,ys) -> (ys, x::xs)) xs ([],[])
-
 (* "Function: merge" : 'a list -> 'a list -> 'a list *) 
 (* merge xl yl merges the elements from xl and yl into a single sorted list. *)
 let rec merge xl yl = match xl, yl with

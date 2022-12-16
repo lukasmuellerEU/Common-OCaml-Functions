@@ -51,3 +51,8 @@ let rec exists p xl = match xl with
 let rec forall p xl = match xl with
   | [] -> true
   | h::tl -> p h && forall p tl 
+
+(* "Function: split" : 'a list -> 'a list * 'a list *) 
+(* Call exmaple: split [1; 2; 3; 4] *)
+(* This function splits the list xs into two nearly equally large lists *)
+let split xs = foldl (fun x (xs,ys) -> (ys, x::xs)) xs ([],[])
