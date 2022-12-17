@@ -1,7 +1,21 @@
 
 (* //////////////////////////////
-   lists functions
+   list functions
    ////////////////////////////// *) 
+
+(* "Function: tl" : 'a list -> 'a list *)
+(* Returns the tail of the given list, which is all the elements except for the first one.
+   If the list is empty, raises the Not_found exception. *)
+let tl xl = match xl with
+| [] -> raise Not_found
+| h::tl -> tl
+
+(* "Function: hd" : 'a list -> 'a *) 
+(* Returns the head of the given list, which is the first element.
+   If the list is empty, raises the Not_found exception. *)
+let hd xl = match xl with
+| [] -> raise Not_found
+| h::tl -> h
 
 (* "Function: length" : 'a list -> int *) 
 (* Returns the length of the given list xl *) 
@@ -56,3 +70,14 @@ let rec forall p xl = match xl with
 (* Call exmaple: split [1; 2; 3; 4] *)
 (* This function splits the list xs into two nearly equally large lists *)
 let split xs = foldl (fun x (xs,ys) -> (ys, x::xs)) xs ([],[])
+
+(* "Function: combine" : 'a list -> 'b list -> ('a * 'b) list *) 
+(* Returns a list of tuples containing every possible combination of elements from the input lists xs and ys. *)
+(* Example call "combine [1;2] [3;4]"" -> [(1, 3); (1, 4); (2, 3); (2, 4)] *)
+let combine xs ys =
+  flatten (foldr (fun x y -> (map (fun b -> (x,b)) ys) :: y) xs [])
+
+(* "Function: cross" : ('a * 'b -> bool) -> 'a list -> 'b list -> ('a * 'b) list *) 
+(* Returns a list of tuples containing every possible combination of elements from the input lists xs and ys that satisfy the predicate p. *)
+let cross p xs ys =
+  filter p (combine xs ys)

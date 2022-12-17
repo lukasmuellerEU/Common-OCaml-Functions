@@ -74,3 +74,21 @@ let rec msort xl = match xl with
   | [x] -> [x]
   | xl -> let (xs,ys) = split xl in
       merge (msort xs) (msort ys)
+
+(* "Function: sorted" : ('a -> 'a -> comparison) -> 'a list -> bool *) 
+(* Returns a boolean indicating whether the input list xs is sorted according to the comparison function f. *)
+let rec sorted f xs = match xs with
+  | []  -> true
+  | [x] -> true
+  | h :: h2 :: tl -> match (f h h2) with
+    | LE -> sorted f (h2 :: tl)
+    | EQ -> sorted f (h2 :: tl)
+    | GR -> false
+
+(* Shorter version of the same function *)
+let rec sorted f xs = match xs with
+  | []  -> true
+  | [x] -> true
+  | h :: h2 :: tl -> match (f h h2) with 
+    | GR -> false 
+    | _ -> sorted f (h2 :: tl)

@@ -3,13 +3,17 @@
    Trees
    ////////////////////////////// *)
 
-   (* Type definition *)
+(* Type definition *)
 type tree = T of tree list
 
 (* Exmaple trees to test with *)
 let t1 = T []
 let t2 = T [t1; t1; t1]
 let t3 = T [T[t2]; t1; t2] 
+
+(* "Function: fold" : ('a list -> 'a) -> tree -> 'a *) 
+(* Recursively applies f to the input tree by mapping fold f to each tree in the list of trees contained within the input tree. *)
+let rec fold f (T ts) = f (map (fold f) ts)
 
 (* This function computes the size of a given tree 'T ts', which is defined as the number of nodes it contains (including the root).
 It uses recursion to compute the size of each of the children of 'T ts' and returns the sum of those sizes plus 1 (to account for the root). *) 

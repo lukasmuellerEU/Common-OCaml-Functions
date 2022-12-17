@@ -132,8 +132,48 @@ let firstwuntil p s =
   until p (fun s -> s + 1) (fun s -> s + 1) s s
 
 (* //////////////////////////////
-   lists functions
+   fold functions
+   ////////////////////////////// *)
+
+
+(* "Function: foldl" : '('a -> 'b -> 'b) -> 'a list -> 'b -> 'b *) 
+(* foldl is a function that applies a given function [f] to each element of a list [xl] and an accumulator [a],
+ * starting from the left side of the list and moving towards the right. The function returns the final result
+ * of applying [f] to the elements of the list and the accumulator.
+ *
+ * The function takes the following arguments:
+ *   - f: the function to apply to each element of the list and the accumulator.
+ *   - xl: the list of elements to apply the function [f] to.
+ *   - a: the accumulator value.
+*)
+let rec foldl f xl a = match xl with
+  | [] -> a
+  | h::tl -> foldl f tl (f h a)
+  
+(* "Function: foldr" : ('a -> 'b -> 'b) -> 'a list -> 'b -> 'b *) 
+(* foldr applies a function to each element of a list, starting from the rightmost
+   element, and combines the results with an accumulator value to produce a final
+   result. *)
+let rec foldr f xl a = match xl with
+  | [] -> a
+  | h::tl -> f h(foldr f tl a)
+(* //////////////////////////////
+   list functions
    ////////////////////////////// *) 
+
+(* "Function: tl" : 'a list -> 'a list *)
+(* Returns the tail of the given list, which is all the elements except for the first one.
+   If the list is empty, raises the Not_found exception. *)
+let tl xl = match xl with
+| [] -> raise Not_found
+| h::tl -> tl
+
+(* "Function: hd" : 'a list -> 'a *) 
+(* Returns the head of the given list, which is the first element.
+   If the list is empty, raises the Not_found exception. *)
+let hd xl = match xl with
+| [] -> raise Not_found
+| h::tl -> h
 
 (* "Function: length" : 'a list -> int *) 
 (* Returns the length of the given list xl *) 
@@ -185,36 +225,20 @@ let rec forall p xl = match xl with
   | h::tl -> p h && forall p tl 
 
 (* "Function: split" : 'a list -> 'a list * 'a list *) 
-(* Call exmaple: split [1; 2; 3; 4]*)
+(* Call exmaple: split [1; 2; 3; 4] *)
 (* This function splits the list xs into two nearly equally large lists *)
 let split xs = foldl (fun x (xs,ys) -> (ys, x::xs)) xs ([],[])
 
-(* //////////////////////////////
-   fold functions
-   ////////////////////////////// *)
+(* "Function: combine" : 'a list -> 'b list -> ('a * 'b) list *) 
+(* Returns a list of tuples containing every possible combination of elements from the input lists xs and ys. *)
+(* Example call "combine [1;2] [3;4]"" -> [(1, 3); (1, 4); (2, 3); (2, 4)] *)
+let combine xs ys =
+  flatten (foldr (fun x y -> (map (fun b -> (x,b)) ys) :: y) xs [])
 
-
-(* "Function: foldl" : '('a -> 'b -> 'b) -> 'a list -> 'b -> 'b *) 
-(* foldl is a function that applies a given function [f] to each element of a list [xl] and an accumulator [a],
- * starting from the left side of the list and moving towards the right. The function returns the final result
- * of applying [f] to the elements of the list and the accumulator.
- *
- * The function takes the following arguments:
- *   - f: the function to apply to each element of the list and the accumulator.
- *   - xl: the list of elements to apply the function [f] to.
- *   - a: the accumulator value.
-*)
-let rec foldl f xl a = match xl with
-  | [] -> a
-  | h::tl -> foldl f tl (f h a)
-  
-(* "Function: foldr" : ('a -> 'b -> 'b) -> 'a list -> 'b -> 'b *) 
-(* foldr applies a function to each element of a list, starting from the rightmost
-   element, and combines the results with an accumulator value to produce a final
-   result. *)
-let rec foldr f xl a = match xl with
-  | [] -> a
-  | h::tl -> f h(foldr f tl a)
+(* "Function: cross" : ('a * 'b -> bool) -> 'a list -> 'b list -> ('a * 'b) list *) 
+(* Returns a list of tuples containing every possible combination of elements from the input lists xs and ys that satisfy the predicate p. *)
+let cross p xs ys =
+  filter p (combine xs ys)
 
 (* //////////////////////////////
    comparison and types
@@ -310,17 +334,39 @@ let rec msort xl = match xl with
   | xl -> let (xs,ys) = split xl in
       merge (msort xs) (msort ys)
 
+(* "Function: sorted" : ('a -> 'a -> comparison) -> 'a list -> bool *) 
+(* Returns a boolean indicating whether the input list xs is sorted according to the comparison function f. *)
+let rec sorted f xs = match xs with
+  | []  -> true
+  | [x] -> true
+  | h :: h2 :: tl -> match (f h h2) with
+    | LE -> sorted f (h2 :: tl)
+    | EQ -> sorted f (h2 :: tl)
+    | GR -> false
+
+(* Shorter version of the same function *)
+let rec sorted f xs = match xs with
+  | []  -> true
+  | [x] -> true
+  | h :: h2 :: tl -> match (f h h2) with 
+    | GR -> false 
+    | _ -> sorted f (h2 :: tl)
+
 (* //////////////////////////////
    Trees
    ////////////////////////////// *)
 
-   (* Type definition *)
+(* Type definition *)
 type tree = T of tree list
 
 (* Exmaple trees to test with *)
 let t1 = T []
 let t2 = T [t1; t1; t1]
 let t3 = T [T[t2]; t1; t2] 
+
+(* "Function: fold" : ('a list -> 'a) -> tree -> 'a *) 
+(* Recursively applies f to the input tree by mapping fold f to each tree in the list of trees contained within the input tree. *)
+let rec fold f (T ts) = f (map (fold f) ts)
 
 (* This function computes the size of a given tree 'T ts', which is defined as the number of nodes it contains (including the root).
 It uses recursion to compute the size of each of the children of 'T ts' and returns the sum of those sizes plus 1 (to account for the root). *) 
@@ -414,6 +460,11 @@ let bbtree n =
 (* Applies the function f to the value x a total of n times, storing the intermediate results in a list. *)
 let iterInside f n x =
   map (fun y -> iter f y x) (List.init (n+1) (fun i -> i))
+
+(* "Function: iter_Inside" : ('a -> 'a) -> int -> 'a -> 'a list *)
+(* Same as iterInside, but in a more elegant way.
+Applies the function f to the value x a total of n times, storing the intermediate results in a list. *)
+let iter_Inside f n a = iter (fun s -> a :: (map f s)) n []
 (*
 //                              //
 // End of pre-defined functions //
